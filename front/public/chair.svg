@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <g transform="translate(40, 30)">
+    <!-- Chair seat -->
+    <path d="M20 80 L100 80 L105 90 L15 90 Z" fill="#1E293B"/>
+    <!-- Chair back -->
+    <path d="M25 20 L95 20 L100 80 L20 80 Z" fill="#334155"/>
+    <!-- Back lines -->
+    <line x1="40" y1="25" x2="40" y2="75" stroke="#1E293B" stroke-width="2"/>
+    <line x1="60" y1="25" x2="60" y2="75" stroke="#1E293B" stroke-width="2"/>
+    <line x1="80" y1="25" x2="80" y2="75" stroke="#1E293B" stroke-width="2"/>
+    <!-- Chair legs -->
+    <rect x="18" y="90" width="8" height="50" fill="#64748B"/>
+    <rect x="94" y="90" width="8" height="50" fill="#64748B"/>
+    <!-- Front legs -->
+    <rect x="30" y="90" width="6" height="45" fill="#64748B"/>
+    <rect x="84" y="90" width="6" height="45" fill="#64748B"/>
+  </g>
+</svg>

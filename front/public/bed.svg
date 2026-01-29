@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <g transform="translate(15, 50)">
+    <!-- Headboard -->
+    <rect x="0" y="0" width="170" height="50" rx="5" fill="#8B5A2B"/>
+    <!-- Headboard detail -->
+    <rect x="10" y="8" width="150" height="35" rx="3" fill="#A0724B"/>
+    <!-- Bed frame -->
+    <rect x="0" y="50" width="170" height="55" rx="3" fill="#D4A574"/>
+    <!-- Mattress -->
+    <rect x="5" y="45" width="160" height="45" rx="4" fill="#F8F8F8"/>
+    <!-- Pillow -->
+    <rect x="15" y="48" width="45" height="20" rx="5" fill="#E8E8E8"/>
+    <rect x="110" y="48" width="45" height="20" rx="5" fill="#E8E8E8"/>
+    <!-- Blanket -->
+    <rect x="5" y="70" width="160" height="20" rx="3" fill="#94A3B8"/>
+    <!-- Legs -->
+    <rect x="10" y="105" width="12" height="15" rx="2" fill="#6B4423"/>
+    <rect x="148" y="105" width="12" height="15" rx="2" fill="#6B4423"/>
+  </g>
+</svg>

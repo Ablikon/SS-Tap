@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <g transform="translate(30, 40)">
+    <!-- Chair back -->
+    <path d="M25 0 C25 0 70 -5 115 0 C120 0 125 10 125 20 L125 70 L15 70 L15 20 C15 10 20 0 25 0" fill="#64748B"/>
+    <!-- Seat -->
+    <rect x="10" y="65" width="120" height="35" rx="5" fill="#475569"/>
+    <!-- Left armrest -->
+    <rect x="0" y="35" width="20" height="70" rx="5" fill="#334155"/>
+    <!-- Right armrest -->
+    <rect x="120" y="35" width="20" height="70" rx="5" fill="#334155"/>
+    <!-- Seat cushion -->
+    <rect x="20" y="68" width="100" height="28" rx="4" fill="#94A3B8"/>
+    <!-- Legs -->
+    <rect x="20" y="100" width="10" height="20" rx="2" fill="#1E293B"/>
+    <rect x="110" y="100" width="10" height="20" rx="2" fill="#1E293B"/>
+  </g>
+</svg>
