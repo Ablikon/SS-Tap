@@ -28,8 +28,28 @@ function Dashboard() {
     { id: '#2844', customer: 'Анна С.', items: 1, total: '3 979 ₸', status: 'delivered', time: '2 часа назад' },
   ]
 
-  const salesData = [35, 52, 48, 65, 72, 58, 82, 95, 78, 88, 92, 105]
-  const maxSales = Math.max(...salesData)
+  const salesData = [
+    { month: 'Янв', value: 245000 },
+    { month: 'Фев', value: 312000 },
+    { month: 'Мар', value: 287000 },
+    { month: 'Апр', value: 425000 },
+    { month: 'Май', value: 478000 },
+    { month: 'Июн', value: 356000 },
+    { month: 'Июл', value: 534000 },
+    { month: 'Авг', value: 612000 },
+    { month: 'Сен', value: 498000 },
+    { month: 'Окт', value: 567000 },
+    { month: 'Ноя', value: 589000 },
+    { month: 'Дек', value: 678000 },
+  ]
+  const maxSales = Math.max(...salesData.map(d => d.value))
+  const totalSales = salesData.reduce((sum, d) => sum + d.value, 0)
+  
+  const formatPrice = (num) => {
+    if (num >= 1000000) return (num / 1000000).toFixed(1) + ' млн'
+    if (num >= 1000) return Math.round(num / 1000) + 'K'
+    return num.toString()
+  }
 
   const menuItems = [
     { id: 'overview', label: 'Обзор', icon: 'home' },
@@ -162,7 +182,13 @@ function Dashboard() {
                 {/* Chart */}
                 <div className="card chart-card">
                   <div className="card-header">
-                    <h3>Продажи за 12 месяцев</h3>
+                    <div className="chart-header-left">
+                      <h3>Продажи за 12 месяцев</h3>
+                      <div className="chart-total">
+                        <span className="chart-total-value">{formatPrice(totalSales)} ₸</span>
+                        <span className="chart-total-change">+18% к прошлому году</span>
+                      </div>
+                    </div>
                     <div className="card-actions">
                       <select className="chart-select">
                         <option>2026</option>
@@ -171,18 +197,35 @@ function Dashboard() {
                     </div>
                   </div>
                   <div className="chart-container">
-                    <div className="chart-bars">
-                      {salesData.map((value, index) => (
-                        <div key={index} className="chart-bar-wrapper">
-                          <div 
-                            className="chart-bar" 
-                            style={{ height: `${(value / maxSales) * 100}%` }}
-                          ></div>
-                          <span className="chart-label">
-                            {['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'][index]}
-                          </span>
-                        </div>
-                      ))}
+                    <div className="chart-y-axis">
+                      <span>{formatPrice(maxSales)}</span>
+                      <span>{formatPrice(maxSales * 0.75)}</span>
+                      <span>{formatPrice(maxSales * 0.5)}</span>
+                      <span>{formatPrice(maxSales * 0.25)}</span>
+                      <span>0</span>
+                    </div>
+                    <div className="chart-area">
+                      <div className="chart-grid">
+                        <div className="grid-line"></div>
+                        <div className="grid-line"></div>
+                        <div className="grid-line"></div>
+                        <div className="grid-line"></div>
+                      </div>
+                      <div className="chart-bars">
+                        {salesData.map((item, index) => (
+                          <div key={index} className="chart-bar-wrapper">
+                            <div className="chart-bar-container">
+                              <div 
+                                className="chart-bar" 
+                                style={{ height: `${(item.value / maxSales) * 100}%` }}
+                              >
+                                <span className="chart-bar-value">{formatPrice(item.value)}</span>
+                              </div>
+                            </div>
+                            <span className="chart-label">{item.month}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>
