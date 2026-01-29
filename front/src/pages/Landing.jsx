@@ -95,7 +95,7 @@ function Landing() {
   }
 
   const handleStart = () => {
-    navigate('/dashboard')
+    navigate('/store')
   }
 
   return (
