@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import '../styles/Store.css'
 
@@ -11,6 +11,15 @@ function Store() {
   const [priceRange, setPriceRange] = useState([0, 500000])
   const [minRating, setMinRating] = useState(0)
   const [sortBy, setSortBy] = useState('popular')
+  const [isScrolled, setIsScrolled] = useState(false)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50)
+    }
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   const categories = [
     { id: 'all', name: 'Все', icon: '⊞' },
@@ -19,6 +28,33 @@ function Store() {
     { id: 'wardrobes', name: 'Шкафы', icon: '🚪' },
     { id: 'beds', name: 'Кровати', icon: '🛏' },
     { id: 'armchairs', name: 'Кресла', icon: '💺' },
+  ]
+
+  const categoryItems = [
+    { name: 'Стулья', image: '/chair.svg' },
+    { name: 'Диваны', image: '/sofa.svg' },
+    { name: 'Шкафы', image: '/wardrobe.svg' },
+    { name: 'Кровати', image: '/bed.svg' },
+    { name: 'Кресла', image: '/armchair.svg' },
+    { name: 'Столы', image: '/chair.svg' },
+  ]
+
+  const categoryTabs = [
+    'БЫТОВАЯ ТЕХНИКА',
+    'МЕБЕЛЬ',
+    'ДОМ И САД',
+    'ЭЛЕКТРОНИКА',
+    'ДЕТСКИЕ ТОВАРЫ',
+    'ЕЩЕ'
+  ]
+
+  const brands = [
+    { name: 'Mebel Style', logo: 'MS' },
+    { name: 'Grid Design', logo: 'GD' },
+    { name: 'Comfort XL', logo: 'CX' },
+    { name: 'Elite Comfort', logo: 'EC' },
+    { name: 'Modern Grey', logo: 'MG' },
+    { name: 'Lounge Premium', logo: 'LP' },
   ]
 
   const sideCategories = [
@@ -92,95 +128,138 @@ function Store() {
   return (
     <div className="store-page">
       {/* Header */}
-      <header className="store-header">
+      <header className={`store-header ${isScrolled ? 'scrolled' : ''}`}>
         <div className="header-container">
-          <div className="header-left">
-            <div className="store-logo">
-              <div className="logo-icon">A</div>
-              <div className="logo-info">
-                <span className="logo-name">TOO "Autodata"</span>
-                <div className="logo-rating">
-                  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                  4.9
+          <div className="header-top">
+            <div className="header-left">
+              <div className="store-logo">
+                <div className="logo-icon">A</div>
+                <div className="logo-info">
+                  <span className="logo-name">TOO "Autodata"</span>
+                  {/* <div className="logo-rating">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                    4.9
+                  </div> */}
                 </div>
               </div>
             </div>
-          </div>
 
-          <div className="header-search">
-            <button className="search-category-btn">
-              Везде
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 9l6 6 6-6"/></svg>
-            </button>
-            <input 
-              type="text" 
-              placeholder="Искать на SS Tap"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            <button className="search-btn">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <circle cx="11" cy="11" r="8"/>
-                <path d="M21 21l-4.35-4.35"/>
-              </svg>
-            </button>
-          </div>
+            <div className="header-search">
+              <button className="search-category-btn">
+                Везде
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 9l6 6 6-6"/></svg>
+              </button>
+              <input 
+                type="text" 
+                placeholder="Искать на SS Tap"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <button className="search-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <circle cx="11" cy="11" r="8"/>
+                  <path d="M21 21l-4.35-4.35"/>
+                </svg>
+              </button>
+            </div>
 
-          <div className="header-actions">
-            <button className="header-action">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                <circle cx="12" cy="7" r="4"/>
-              </svg>
-              <span>Войти</span>
-            </button>
-            <button className="header-action">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-              </svg>
-              <span>Заказы</span>
-            </button>
-            <button className="header-action favorite">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-              </svg>
-              <span>Избранное</span>
-            </button>
-            <button className="header-action cart" onClick={() => setShowCart(true)}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="9" cy="21" r="1"/>
-                <circle cx="20" cy="21" r="1"/>
-                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
-              </svg>
-              <span>Корзина</span>
-              {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
-            </button>
-          </div>
-        </div>
-
-        {/* Categories bar */}
-        <div className="categories-bar">
-          <div className="categories-container">
-            <button className="catalog-btn">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <line x1="3" y1="6" x2="21" y2="6"/>
-                <line x1="3" y1="12" x2="21" y2="12"/>
-                <line x1="3" y1="18" x2="21" y2="18"/>
-              </svg>
-              Каталог
-            </button>
-            <div className="categories-links">
-              <a href="#">Рассрочка 0-0-12</a>
-              <a href="#">Казахстанские продавцы</a>
-              <a href="#">Мебель</a>
-              <a href="#">Дом и сад</a>
-              <a href="#">Электроника</a>
-              <a href="#">Детские товары</a>
-              <a href="#">Бытовая техника</a>
+            <div className="header-actions">
+              <button className="header-action">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+                <span>Войти</span>
+              </button>
+              <button className="header-action">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                </svg>
+                <span>Заказы</span>
+              </button>
+              <button className="header-action favorite">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                </svg>
+                <span>Избранное</span>
+              </button>
+              <button className="header-action cart" onClick={() => setShowCart(true)}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="9" cy="21" r="1"/>
+                  <circle cx="20" cy="21" r="1"/>
+                  <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                </svg>
+                <span>Корзина</span>
+                {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
+              </button>
             </div>
           </div>
+
+          {!isScrolled && (
+            <div className="header-bottom">
+              <button className="catalog-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="3" y1="6" x2="21" y2="6"/>
+                  <line x1="3" y1="12" x2="21" y2="12"/>
+                  <line x1="3" y1="18" x2="21" y2="18"/>
+                </svg>
+                Каталог
+              </button>
+              <div className="categories-links">
+                <a href="#">Рассрочка 0-0-12</a>
+                <a href="#">Казахстанские продавцы</a>
+                <a href="#">Мебель</a>
+                <a href="#">Дом и сад</a>
+                <a href="#">Электроника</a>
+                <a href="#">Детские товары</a>
+                <a href="#">Бытовая техника</a>
+              </div>
+            </div>
+          )}
         </div>
       </header>
+
+      {/* Category Section */}
+      <section className="category-section">
+        <div className="category-header-wrapper">
+          <h2 className="category-title">Мебель</h2>
+          <div className="category-tabs">
+            {categoryTabs.map((tab, index) => (
+              <button key={index} className={`category-tab ${index === 1 ? 'active' : ''}`}>
+                {tab}
+              </button>
+            ))}
+          </div>
+        </div>
+        
+        <div className="category-grid-block">
+          <div className="category-grid">
+            {categoryItems.map((item, index) => (
+              <div key={index} className="category-card">
+                <div className="category-image">
+                  <img src={item.image} alt={item.name} />
+                </div>
+                <span className="category-name">{item.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Popular Brands */}
+      <section className="brands-section">
+        <div className="brands-container">
+          <h3 className="brands-title">Популярные бренды</h3>
+          <div className="brands-grid">
+            {brands.map((brand, index) => (
+              <div key={index} className="brand-item">
+                <div className="brand-logo">{brand.logo}</div>
+                <span className="brand-name">{brand.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* Main Content */}
       <main className="store-main">
@@ -199,9 +278,7 @@ function Store() {
                   <a href="#">Посмотреть все</a>
                 </li>
               </ul>
-            </div>
 
-            <div className="sidebar-block">
               <h3 className="sidebar-title">Цена, ₸</h3>
               <div className="price-range">
                 <input 
@@ -210,6 +287,7 @@ function Store() {
                   value={priceRange[0] || ''}
                   onChange={(e) => setPriceRange([Number(e.target.value) || 0, priceRange[1]])}
                 />
+                <span className="price-separator">—</span>
                 <input 
                   type="number" 
                   placeholder="до"
@@ -217,14 +295,7 @@ function Store() {
                   onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value) || 500000])}
                 />
               </div>
-              <div className="price-slider">
-                <div className="slider-track">
-                  <div className="slider-fill"></div>
-                </div>
-              </div>
-            </div>
 
-            <div className="sidebar-block">
               <h3 className="sidebar-title">Рейтинг</h3>
               <div className="rating-options">
                 {[4.5, 4, 3.5, 3].map(rating => (
@@ -241,9 +312,7 @@ function Store() {
                   </label>
                 ))}
               </div>
-            </div>
 
-            <div className="sidebar-block">
               <h3 className="sidebar-title">Срок доставки</h3>
               <div className="delivery-options">
                 <label className="delivery-option">
