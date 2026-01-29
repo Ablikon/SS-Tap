@@ -8,6 +8,9 @@ function Store() {
   const [showCart, setShowCart] = useState(false)
   const [activeCategory, setActiveCategory] = useState('Все')
   const [searchQuery, setSearchQuery] = useState('')
+  const [priceRange, setPriceRange] = useState([0, 500000])
+  const [minRating, setMinRating] = useState(0)
+  const [sortBy, setSortBy] = useState('default')
 
   const categories = ['Все', 'Стулья', 'Диваны', 'Шкафы', 'Кровати', 'Кресла']
 
@@ -44,9 +47,22 @@ function Store() {
   const cartTotal = cartItems.reduce((sum, item) => sum + item.price * item.qty, 0)
   const cartCount = cartItems.reduce((sum, item) => sum + item.qty, 0)
 
-  const filtered = activeCategory === 'Все' 
+  let filtered = activeCategory === 'Все' 
     ? products.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.desc.toLowerCase().includes(searchQuery.toLowerCase()))
     : products.filter(p => p.category === activeCategory && (p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.desc.toLowerCase().includes(searchQuery.toLowerCase())))
+  
+  // Apply filters
+  filtered = filtered.filter(p => p.price >= priceRange[0] && p.price <= priceRange[1])
+  filtered = filtered.filter(p => p.rating >= minRating)
+  
+  // Apply sorting
+  if (sortBy === 'price-asc') {
+    filtered = [...filtered].sort((a, b) => a.price - b.price)
+  } else if (sortBy === 'price-desc') {
+    filtered = [...filtered].sort((a, b) => b.price - a.price)
+  } else if (sortBy === 'rating') {
+    filtered = [...filtered].sort((a, b) => b.rating - a.rating)
+  }
 
   return (
     <div className="store-page">
@@ -100,8 +116,8 @@ function Store() {
               <span className="badge-dot"></span>
               Официальный магазин
             </div>
-            <h1>Мебель для вашего комфорта</h1>
-            <p>Качественная мебель с доставкой по Казахстану. Оплата через Kaspi QR.</p>
+            <h1>Качественные товары для вас</h1>
+            <p>Широкий ассортимент с доставкой по всему Казахстану. Оплата через Kaspi.</p>
           </div>
           <div className="hero-stats">
             <div className="stat-item">
@@ -123,24 +139,109 @@ function Store() {
       {/* Catalog Section */}
       <section className="store-catalog">
         <div className="catalog-container">
-          <div className="catalog-header">
-            <h2>Каталог</h2>
-            <div className="catalog-count">{filtered.length} товаров</div>
-          </div>
+          <aside className="catalog-sidebar">
+            <div className="sidebar-section">
+              <h3 className="sidebar-title">Фильтры</h3>
+              
+              <div className="filter-group">
+                <label className="filter-label">Цена</label>
+                <div className="price-inputs">
+                  <input 
+                    type="number" 
+                    placeholder="От"
+                    value={priceRange[0] || ''}
+                    onChange={(e) => setPriceRange([Number(e.target.value) || 0, priceRange[1]])}
+                    className="price-input"
+                  />
+                  <span className="price-separator">—</span>
+                  <input 
+                    type="number" 
+                    placeholder="До"
+                    value={priceRange[1] || ''}
+                    onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value) || 500000])}
+                    className="price-input"
+                  />
+                </div>
+              </div>
 
-          <div className="catalog-tabs">
-            {categories.map(cat => (
-              <button 
-                key={cat}
-                className={`catalog-tab ${activeCategory === cat ? 'active' : ''}`}
-                onClick={() => setActiveCategory(cat)}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
+              <div className="filter-group">
+                <label className="filter-label">Рейтинг</label>
+                <div className="rating-filters">
+                  {[4.5, 4.0, 3.5, 3.0].map(rating => (
+                    <button
+                      key={rating}
+                      className={`rating-filter ${minRating === rating ? 'active' : ''}`}
+                      onClick={() => setMinRating(minRating === rating ? 0 : rating)}
+                    >
+                      <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                      </svg>
+                      {rating}+
+                    </button>
+                  ))}
+                </div>
+              </div>
 
-          <div className="catalog-grid">
+              <div className="filter-group">
+                <label className="filter-label">Сортировка</label>
+                <select 
+                  className="sort-select"
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                >
+                  <option value="default">По умолчанию</option>
+                  <option value="price-asc">Цена: по возрастанию</option>
+                  <option value="price-desc">Цена: по убыванию</option>
+                  <option value="rating">По рейтингу</option>
+                </select>
+              </div>
+
+              <div className="sidebar-info">
+                <div className="info-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                  </svg>
+                  <span>Гарантия 2 года</span>
+                </div>
+                <div className="info-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M5 12.55a11 11 0 0 1 14.08 0"/>
+                    <path d="M1.42 9a16 16 0 0 1 21.16 0"/>
+                    <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+                    <circle cx="12" cy="20" r="1"/>
+                  </svg>
+                  <span>Бесплатная доставка</span>
+                </div>
+                <div className="info-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="1" y="4" width="22" height="16" rx="2"/>
+                    <line x1="1" y1="10" x2="23" y2="10"/>
+                  </svg>
+                  <span>Kaspi оплата</span>
+                </div>
+              </div>
+            </div>
+          </aside>
+
+          <div className="catalog-main">
+            <div className="catalog-header">
+              <h2>Каталог</h2>
+              <div className="catalog-count">{filtered.length} товаров</div>
+            </div>
+
+            <div className="catalog-tabs">
+              {categories.map(cat => (
+                <button 
+                  key={cat}
+                  className={`catalog-tab ${activeCategory === cat ? 'active' : ''}`}
+                  onClick={() => setActiveCategory(cat)}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+
+            <div className="catalog-grid">
             {filtered.map((product, i) => (
               <div 
                 key={product.id} 
@@ -184,6 +285,7 @@ function Store() {
                 </div>
               </div>
             ))}
+            </div>
           </div>
         </div>
       </section>
@@ -287,7 +389,7 @@ function Store() {
                   </div>
                   <button className="cart-checkout">Оформить заказ</button>
                   <div className="cart-payment">
-                    Оплата: <span>Kaspi QR</span>
+                    Оплата: <span>Kaspi</span>
                   </div>
                 </div>
               </>

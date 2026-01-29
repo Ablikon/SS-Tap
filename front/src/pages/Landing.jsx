@@ -289,7 +289,7 @@ function Landing() {
                       <div className="form-value">Алматы, Бухар жырау</div>
                     </div>
                   </div>
-                  <div className="screen-cart-btn kaspi-btn">Оплатить Kaspi QR</div>
+                  <div className="screen-cart-btn kaspi-btn">Оплатить Kaspi</div>
                 </div>
               </div>
             </div>
