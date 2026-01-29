@@ -10,17 +10,35 @@ function Store() {
   const [searchQuery, setSearchQuery] = useState('')
   const [priceRange, setPriceRange] = useState([0, 500000])
   const [minRating, setMinRating] = useState(0)
-  const [sortBy, setSortBy] = useState('default')
+  const [sortBy, setSortBy] = useState('popular')
 
-  const categories = ['Все', 'Стулья', 'Диваны', 'Шкафы', 'Кровати', 'Кресла']
+  const categories = [
+    { id: 'all', name: 'Все', icon: '⊞' },
+    { id: 'chairs', name: 'Стулья', icon: '🪑' },
+    { id: 'sofas', name: 'Диваны', icon: '🛋' },
+    { id: 'wardrobes', name: 'Шкафы', icon: '🚪' },
+    { id: 'beds', name: 'Кровати', icon: '🛏' },
+    { id: 'armchairs', name: 'Кресла', icon: '💺' },
+  ]
+
+  const sideCategories = [
+    { name: 'Мебель для дома', count: 156 },
+    { name: 'Стулья и табуреты', count: 43 },
+    { name: 'Диваны и кресла', count: 67 },
+    { name: 'Шкафы и комоды', count: 28 },
+    { name: 'Кровати и матрасы', count: 35 },
+    { name: 'Столы', count: 24 },
+  ]
 
   const products = [
-    { id: 1, name: 'Mebel Style Rumba', desc: 'Стул обеденный красный', category: 'Стулья', price: 14757, image: '/chair.svg', rating: 4.8, reviews: 22, badge: 'new' },
-    { id: 2, name: 'Grid Design Pro', desc: 'Стул офисный чёрный', category: 'Стулья', price: 24759, image: '/chair.svg', rating: 4.9, reviews: 15 },
-    { id: 3, name: 'Comfort XL', desc: 'Шкаф-купе белый', category: 'Шкафы', price: 64879, image: '/wardrobe.svg', rating: 4.7, reviews: 56, badge: 'sale', oldPrice: 74990 },
-    { id: 4, name: 'Elite Comfort', desc: 'Кровать двуспальная', category: 'Кровати', price: 205795, image: '/bed.svg', rating: 4.9, reviews: 203 },
-    { id: 5, name: 'Modern Grey', desc: 'Диван угловой серый', category: 'Диваны', price: 189990, image: '/sofa.svg', rating: 4.6, reviews: 78, badge: 'hit' },
-    { id: 6, name: 'Lounge Premium', desc: 'Кресло для отдыха', category: 'Кресла', price: 156000, image: '/armchair.svg', rating: 4.8, reviews: 145 },
+    { id: 1, name: 'Стул обеденный Mebel Style Rumba', category: 'Стулья', price: 14757, oldPrice: 18990, image: '/chair.svg', rating: 4.8, reviews: 156, badge: 'new', delivery: 'Завтра', credit: '2 458' },
+    { id: 2, name: 'Стул офисный Grid Design Pro', category: 'Стулья', price: 24759, image: '/chair.svg', rating: 4.9, reviews: 89, delivery: '2 февраля', credit: '4 127' },
+    { id: 3, name: 'Шкаф-купе Comfort XL белый', category: 'Шкафы', price: 64879, oldPrice: 74990, image: '/wardrobe.svg', rating: 4.7, reviews: 234, badge: 'sale', delivery: 'Завтра', credit: '10 813' },
+    { id: 4, name: 'Кровать двуспальная Elite Comfort', category: 'Кровати', price: 205795, image: '/bed.svg', rating: 4.9, reviews: 412, badge: 'hit', delivery: '3 февраля', credit: '34 299' },
+    { id: 5, name: 'Диван угловой Modern Grey', category: 'Диваны', price: 189990, oldPrice: 219990, image: '/sofa.svg', rating: 4.6, reviews: 178, delivery: 'Завтра', credit: '31 665' },
+    { id: 6, name: 'Кресло для отдыха Lounge Premium', category: 'Кресла', price: 156000, image: '/armchair.svg', rating: 4.8, reviews: 145, delivery: '4 февраля', credit: '26 000' },
+    { id: 7, name: 'Стул барный Industrial Loft', category: 'Стулья', price: 19990, image: '/chair.svg', rating: 4.5, reviews: 67, delivery: 'Завтра', credit: '3 332' },
+    { id: 8, name: 'Шкаф книжный Open Space', category: 'Шкафы', price: 45990, image: '/wardrobe.svg', rating: 4.4, reviews: 98, badge: 'new', delivery: '5 февраля', credit: '7 665' },
   ]
 
   const formatPrice = (price) => price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
@@ -47,15 +65,22 @@ function Store() {
   const cartTotal = cartItems.reduce((sum, item) => sum + item.price * item.qty, 0)
   const cartCount = cartItems.reduce((sum, item) => sum + item.qty, 0)
 
+  const categoryMap = {
+    'Все': 'all',
+    'Стулья': 'chairs',
+    'Диваны': 'sofas',
+    'Шкафы': 'wardrobes',
+    'Кровати': 'beds',
+    'Кресла': 'armchairs'
+  }
+
   let filtered = activeCategory === 'Все' 
-    ? products.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.desc.toLowerCase().includes(searchQuery.toLowerCase()))
-    : products.filter(p => p.category === activeCategory && (p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.desc.toLowerCase().includes(searchQuery.toLowerCase())))
+    ? products.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    : products.filter(p => p.category === activeCategory && p.name.toLowerCase().includes(searchQuery.toLowerCase()))
   
-  // Apply filters
   filtered = filtered.filter(p => p.price >= priceRange[0] && p.price <= priceRange[1])
   filtered = filtered.filter(p => p.rating >= minRating)
   
-  // Apply sorting
   if (sortBy === 'price-asc') {
     filtered = [...filtered].sort((a, b) => a.price - b.price)
   } else if (sortBy === 'price-desc') {
@@ -66,237 +91,275 @@ function Store() {
 
   return (
     <div className="store-page">
-      {/* Navigation */}
-      <nav className="store-nav">
-        <div className="nav-container">
-          <div className="nav-brand">
-            <div className="brand-logo">A</div>
-            <div className="brand-info">
-              <div className="brand-name">TOO "Autodata"</div>
-              <div className="brand-rating">
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                </svg>
-                4.9
+      {/* Header */}
+      <header className="store-header">
+        <div className="header-container">
+          <div className="header-left">
+            <div className="store-logo">
+              <div className="logo-icon">A</div>
+              <div className="logo-info">
+                <span className="logo-name">TOO "Autodata"</span>
+                <div className="logo-rating">
+                  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                  4.9
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="nav-search">
-            <svg className="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="11" cy="11" r="8"/>
-              <path d="M21 21l-4.35-4.35"/>
-            </svg>
+          <div className="header-search">
+            <button className="search-category-btn">
+              Везде
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
             <input 
               type="text" 
-              placeholder="Поиск по магазину"
+              placeholder="Искать на SS Tap"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
+            <button className="search-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="M21 21l-4.35-4.35"/>
+              </svg>
+            </button>
           </div>
 
-          <div className="nav-actions">
-            <button className="nav-cart-btn" onClick={() => setShowCart(true)}>
+          <div className="header-actions">
+            <button className="header-action">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+              <span>Войти</span>
+            </button>
+            <button className="header-action">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+              </svg>
+              <span>Заказы</span>
+            </button>
+            <button className="header-action favorite">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+              </svg>
+              <span>Избранное</span>
+            </button>
+            <button className="header-action cart" onClick={() => setShowCart(true)}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="9" cy="21" r="1"/>
                 <circle cx="20" cy="21" r="1"/>
                 <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
               </svg>
-              {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
+              <span>Корзина</span>
+              {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
             </button>
           </div>
         </div>
-      </nav>
 
-      {/* Hero Section */}
-      <section className="store-hero">
-        <div className="hero-container">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <span className="badge-dot"></span>
-              Официальный магазин
-            </div>
-            <h1>Качественные товары для вас</h1>
-            <p>Широкий ассортимент с доставкой по всему Казахстану. Оплата через Kaspi.</p>
-          </div>
-          <div className="hero-stats">
-            <div className="stat-item">
-              <div className="stat-value">500+</div>
-              <div className="stat-label">товаров</div>
-            </div>
-            <div className="stat-item">
-              <div className="stat-value">2000+</div>
-              <div className="stat-label">клиентов</div>
-            </div>
-            <div className="stat-item">
-              <div className="stat-value">4.9</div>
-              <div className="stat-label">рейтинг</div>
+        {/* Categories bar */}
+        <div className="categories-bar">
+          <div className="categories-container">
+            <button className="catalog-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="3" y1="6" x2="21" y2="6"/>
+                <line x1="3" y1="12" x2="21" y2="12"/>
+                <line x1="3" y1="18" x2="21" y2="18"/>
+              </svg>
+              Каталог
+            </button>
+            <div className="categories-links">
+              <a href="#">Рассрочка 0-0-12</a>
+              <a href="#">Казахстанские продавцы</a>
+              <a href="#">Мебель</a>
+              <a href="#">Дом и сад</a>
+              <a href="#">Электроника</a>
+              <a href="#">Детские товары</a>
+              <a href="#">Бытовая техника</a>
             </div>
           </div>
         </div>
-      </section>
+      </header>
 
-      {/* Catalog Section */}
-      <section className="store-catalog">
-        <div className="catalog-container">
-          <aside className="catalog-sidebar">
-            <div className="sidebar-section">
-              <h3 className="sidebar-title">Фильтры</h3>
-              
-              <div className="filter-group">
-                <label className="filter-label">Цена</label>
-                <div className="price-inputs">
-                  <input 
-                    type="number" 
-                    placeholder="От"
-                    value={priceRange[0] || ''}
-                    onChange={(e) => setPriceRange([Number(e.target.value) || 0, priceRange[1]])}
-                    className="price-input"
-                  />
-                  <span className="price-separator">—</span>
-                  <input 
-                    type="number" 
-                    placeholder="До"
-                    value={priceRange[1] || ''}
-                    onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value) || 500000])}
-                    className="price-input"
-                  />
+      {/* Main Content */}
+      <main className="store-main">
+        <div className="main-container">
+          {/* Sidebar */}
+          <aside className="store-sidebar">
+            <div className="sidebar-block">
+              <h3 className="sidebar-title">Категория</h3>
+              <ul className="category-list">
+                {sideCategories.map((cat, i) => (
+                  <li key={i} className={i === 0 ? 'active' : ''}>
+                    <a href="#">{cat.name}</a>
+                  </li>
+                ))}
+                <li className="show-all">
+                  <a href="#">Посмотреть все</a>
+                </li>
+              </ul>
+            </div>
+
+            <div className="sidebar-block">
+              <h3 className="sidebar-title">Цена, ₸</h3>
+              <div className="price-range">
+                <input 
+                  type="number" 
+                  placeholder="от"
+                  value={priceRange[0] || ''}
+                  onChange={(e) => setPriceRange([Number(e.target.value) || 0, priceRange[1]])}
+                />
+                <input 
+                  type="number" 
+                  placeholder="до"
+                  value={priceRange[1] || ''}
+                  onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value) || 500000])}
+                />
+              </div>
+              <div className="price-slider">
+                <div className="slider-track">
+                  <div className="slider-fill"></div>
                 </div>
               </div>
+            </div>
 
-              <div className="filter-group">
-                <label className="filter-label">Рейтинг</label>
-                <div className="rating-filters">
-                  {[4.5, 4.0, 3.5, 3.0].map(rating => (
-                    <button
-                      key={rating}
-                      className={`rating-filter ${minRating === rating ? 'active' : ''}`}
-                      onClick={() => setMinRating(minRating === rating ? 0 : rating)}
-                    >
-                      <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                      </svg>
-                      {rating}+
-                    </button>
-                  ))}
-                </div>
+            <div className="sidebar-block">
+              <h3 className="sidebar-title">Рейтинг</h3>
+              <div className="rating-options">
+                {[4.5, 4, 3.5, 3].map(rating => (
+                  <label key={rating} className="rating-option">
+                    <input 
+                      type="radio" 
+                      name="rating" 
+                      checked={minRating === rating}
+                      onChange={() => setMinRating(minRating === rating ? 0 : rating)}
+                    />
+                    <span className="radio-custom"></span>
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                    от {rating}
+                  </label>
+                ))}
               </div>
+            </div>
 
-              <div className="filter-group">
-                <label className="filter-label">Сортировка</label>
-                <select 
-                  className="sort-select"
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                >
-                  <option value="default">По умолчанию</option>
-                  <option value="price-asc">Цена: по возрастанию</option>
-                  <option value="price-desc">Цена: по убыванию</option>
-                  <option value="rating">По рейтингу</option>
-                </select>
-              </div>
-
-              <div className="sidebar-info">
-                <div className="info-item">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                  </svg>
-                  <span>Гарантия 2 года</span>
-                </div>
-                <div className="info-item">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M5 12.55a11 11 0 0 1 14.08 0"/>
-                    <path d="M1.42 9a16 16 0 0 1 21.16 0"/>
-                    <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
-                    <circle cx="12" cy="20" r="1"/>
-                  </svg>
-                  <span>Бесплатная доставка</span>
-                </div>
-                <div className="info-item">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect x="1" y="4" width="22" height="16" rx="2"/>
-                    <line x1="1" y1="10" x2="23" y2="10"/>
-                  </svg>
-                  <span>Kaspi оплата</span>
-                </div>
+            <div className="sidebar-block">
+              <h3 className="sidebar-title">Срок доставки</h3>
+              <div className="delivery-options">
+                <label className="delivery-option">
+                  <input type="radio" name="delivery" />
+                  <span className="radio-custom"></span>
+                  Завтра
+                </label>
+                <label className="delivery-option">
+                  <input type="radio" name="delivery" />
+                  <span className="radio-custom"></span>
+                  До 3 дней
+                </label>
+                <label className="delivery-option">
+                  <input type="radio" name="delivery" />
+                  <span className="radio-custom"></span>
+                  До 7 дней
+                </label>
               </div>
             </div>
           </aside>
 
-          <div className="catalog-main">
-            <div className="catalog-header">
-              <h2>Каталог</h2>
-              <div className="catalog-count">{filtered.length} товаров</div>
+          {/* Products */}
+          <div className="products-section">
+            <div className="products-header">
+              <div className="products-sort">
+                <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+                  <option value="popular">Популярные</option>
+                  <option value="price-asc">Сначала дешевле</option>
+                  <option value="price-desc">Сначала дороже</option>
+                  <option value="rating">По рейтингу</option>
+                </select>
+              </div>
+              <div className="products-tabs">
+                {categories.map(cat => (
+                  <button 
+                    key={cat.id}
+                    className={`tab ${activeCategory === cat.name ? 'active' : ''}`}
+                    onClick={() => setActiveCategory(cat.name)}
+                  >
+                    {cat.name}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            <div className="catalog-tabs">
-              {categories.map(cat => (
-                <button 
-                  key={cat}
-                  className={`catalog-tab ${activeCategory === cat ? 'active' : ''}`}
-                  onClick={() => setActiveCategory(cat)}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-
-            <div className="catalog-grid">
-            {filtered.map((product, i) => (
-              <div 
-                key={product.id} 
-                className="product-card"
-              >
-                {product.badge && (
-                  <div className={`product-badge ${product.badge}`}>
-                    {product.badge === 'new' && 'НОВИНКА'}
-                    {product.badge === 'hit' && 'ХИТ'}
-                    {product.badge === 'sale' && `-${Math.round((1 - product.price / product.oldPrice) * 100)}%`}
-                  </div>
-                )}
-                
-                <div className="product-image">
-                  <img src={product.image} alt={product.name} />
-                </div>
-
-                <div className="product-info">
-                  <div className="product-category">{product.category.toUpperCase()}</div>
-                  <h3 className="product-name">{product.name}</h3>
-                  <div className="product-rating">
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            <div className="products-grid">
+              {filtered.map((product) => (
+                <div key={product.id} className="product-card">
+                  <button className="product-favorite">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
                     </svg>
-                    {product.rating} ({product.reviews})
+                  </button>
+                  
+                  {product.badge && (
+                    <div className={`product-badge ${product.badge}`}>
+                      {product.badge === 'new' && 'Новинка'}
+                      {product.badge === 'hit' && 'Хит продаж'}
+                      {product.badge === 'sale' && `-${Math.round((1 - product.price / product.oldPrice) * 100)}%`}
+                    </div>
+                  )}
+
+                  <div className="product-image">
+                    <img src={product.image} alt={product.name} />
                   </div>
-                  <div className="product-price-row">
-                    <div className="product-price">
+
+                  <div className="product-content">
+                    <div className="product-credit">
+                      <span>{product.credit} ₸</span> × 6 мес
+                    </div>
+                    
+                    <div className="product-prices">
+                      <span className="price-current">{formatPrice(product.price)} ₸</span>
                       {product.oldPrice && (
                         <span className="price-old">{formatPrice(product.oldPrice)} ₸</span>
                       )}
-                      <span className="price-current">{formatPrice(product.price)} ₸</span>
                     </div>
-                    <button className="product-add-btn" onClick={() => addToCart(product)}>
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <line x1="12" y1="5" x2="12" y2="19"/>
-                        <line x1="5" y1="12" x2="19" y2="12"/>
+
+                    <h3 className="product-name">{product.name}</h3>
+
+                    <div className="product-rating">
+                      <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                       </svg>
+                      <span className="rating-value">{product.rating}</span>
+                      <span className="rating-count">{product.reviews} отзывов</span>
+                    </div>
+
+                    <button className="product-delivery">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <rect x="1" y="3" width="15" height="13" rx="2"/>
+                        <path d="M16 8h4l3 3v5h-7V8z"/>
+                        <circle cx="5.5" cy="18.5" r="2.5"/>
+                        <circle cx="18.5" cy="18.5" r="2.5"/>
+                      </svg>
+                      {product.delivery}
+                    </button>
+
+                    <button className="add-to-cart" onClick={() => addToCart(product)}>
+                      В корзину
                     </button>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
             </div>
           </div>
         </div>
-      </section>
+      </main>
 
-      {/* CTA Section */}
-      <section className="store-cta">
+      {/* CTA Banner */}
+      <section className="cta-banner">
         <div className="cta-container">
           <div className="cta-content">
             <h2>Хотите такой же магазин?</h2>
-            <p>Создайте свой онлайн-магазин за 10 секунд. Бесплатно. Без комиссий за подключение.</p>
-            <button className="cta-button" onClick={() => navigate('/dashboard')}>
+            <p>Создайте свой онлайн-магазин за 10 секунд. Бесплатно.</p>
+            <button className="cta-btn" onClick={() => navigate('/dashboard')}>
               Стать продавцом
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M5 12h14M12 5l7 7-7 7"/>
@@ -309,9 +372,7 @@ function Store() {
       {/* Footer */}
       <footer className="store-footer">
         <div className="footer-container">
-          <div className="footer-brand">
-            Работает на <span className="footer-ss">SS</span><span className="footer-tap">Tap</span>
-          </div>
+          <span>Работает на <strong>SS Tap</strong></span>
           <div className="footer-links">
             <a href="#">Доставка</a>
             <a href="#">Оплата</a>
@@ -320,7 +381,7 @@ function Store() {
         </div>
       </footer>
 
-      {/* Floating Cart Button */}
+      {/* Floating Cart */}
       {cartCount > 0 && !showCart && (
         <button className="floating-cart" onClick={() => setShowCart(true)}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -328,18 +389,18 @@ function Store() {
             <circle cx="20" cy="21" r="1"/>
             <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
           </svg>
-          <span className="floating-cart-count">{cartCount}</span>
-          <span className="floating-cart-text">Корзина</span>
+          <span className="cart-badge">{cartCount}</span>
+          <span>{formatPrice(cartTotal)} ₸</span>
         </button>
       )}
 
-      {/* Cart Sidebar */}
+      {/* Cart Drawer */}
       {showCart && (
         <div className="cart-overlay" onClick={() => setShowCart(false)}>
-          <aside className="cart-sidebar" onClick={e => e.stopPropagation()}>
+          <aside className="cart-drawer" onClick={e => e.stopPropagation()}>
             <div className="cart-header">
-              <h3>Корзина</h3>
-              <button className="cart-close" onClick={() => setShowCart(false)}>
+              <h3>Корзина <span>{cartCount}</span></h3>
+              <button onClick={() => setShowCart(false)}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <line x1="18" y1="6" x2="6" y2="18"/>
                   <line x1="6" y1="6" x2="18" y2="18"/>
@@ -361,19 +422,19 @@ function Store() {
                 <div className="cart-items">
                   {cartItems.map(item => (
                     <div key={item.id} className="cart-item">
-                      <div className="cart-item-image">
+                      <div className="item-image">
                         <img src={item.image} alt={item.name} />
                       </div>
-                      <div className="cart-item-info">
+                      <div className="item-info">
                         <h4>{item.name}</h4>
-                        <div className="cart-item-price">{formatPrice(item.price)} ₸</div>
-                        <div className="cart-item-qty">
+                        <div className="item-price">{formatPrice(item.price)} ₸</div>
+                        <div className="item-qty">
                           <button onClick={() => updateQty(item.id, -1)}>−</button>
                           <span>{item.qty}</span>
                           <button onClick={() => updateQty(item.id, 1)}>+</button>
                         </div>
                       </div>
-                      <button className="cart-item-remove" onClick={() => removeItem(item.id)}>
+                      <button className="item-remove" onClick={() => removeItem(item.id)}>
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                           <polyline points="3 6 5 6 21 6"/>
                           <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
@@ -384,12 +445,12 @@ function Store() {
                 </div>
                 <div className="cart-footer">
                   <div className="cart-total">
-                    <span>Итого:</span>
+                    <span>Итого</span>
                     <strong>{formatPrice(cartTotal)} ₸</strong>
                   </div>
-                  <button className="cart-checkout">Оформить заказ</button>
-                  <div className="cart-payment">
-                    Оплата: <span>Kaspi</span>
+                  <button className="checkout-btn">Оформить заказ</button>
+                  <div className="payment-info">
+                    Безопасная оплата через <span>Kaspi</span>
                   </div>
                 </div>
               </>
