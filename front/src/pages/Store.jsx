@@ -197,22 +197,31 @@ function Store() {
 
           {!isScrolled && (
             <div className="header-bottom">
-              <button className="catalog-btn">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <line x1="3" y1="6" x2="21" y2="6"/>
-                  <line x1="3" y1="12" x2="21" y2="12"/>
-                  <line x1="3" y1="18" x2="21" y2="18"/>
-                </svg>
-                Каталог
-              </button>
-              <div className="categories-links">
-                <a href="#">Рассрочка 0-0-12</a>
-                <a href="#">Казахстанские продавцы</a>
-                <a href="#">Мебель</a>
-                <a href="#">Дом и сад</a>
-                <a href="#">Электроника</a>
-                <a href="#">Детские товары</a>
-                <a href="#">Бытовая техника</a>
+              <div className="header-bottom-left">
+                <button className="catalog-btn">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <line x1="3" y1="6" x2="21" y2="6"/>
+                    <line x1="3" y1="12" x2="21" y2="12"/>
+                    <line x1="3" y1="18" x2="21" y2="18"/>
+                  </svg>
+                  Каталог
+                </button>
+                <div className="categories-links">
+                  <a href="#">Рассрочка 0-0-12</a>
+                  <a href="#">Казахстанские продавцы</a>
+                  <a href="#">Мебель</a>
+                  <a href="#">Дом и сад</a>
+                  <a href="#">Электроника</a>
+                  <a href="#">Детские товары</a>
+                  <a href="#">Бытовая техника</a>
+                </div>
+              </div>
+              <div className="header-bottom-right">
+                <span className="location-city">Алматы</span>
+                <a href="#" className="location-link">Укажите адрес</a>
+                <div className="location-flag">
+                 
+                </div>
               </div>
             </div>
           )}
@@ -295,8 +304,19 @@ function Store() {
                   onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value) || 500000])}
                 />
               </div>
+              <div className="price-slider-container">
+                <input
+                  type="range"
+                  min="0"
+                  max="500000"
+                  step="1000"
+                  value={priceRange[1]}
+                  onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value)])}
+                  className="price-slider"
+                />
+              </div>
 
-              <h3 className="sidebar-title">Рейтинг</h3>
+              <h3 className="sidebar-title">Рейтинг продавца</h3>
               <div className="rating-options">
                 {[4.5, 4, 3.5, 3].map(rating => (
                   <label key={rating} className="rating-option">
