@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import FreedomIcon from '../assets/Freedom.png'
 import '../styles/Store.css'
 
 function Store() {
@@ -13,13 +14,17 @@ function Store() {
   const [minRating, setMinRating] = useState(0)
   const [sortBy, setSortBy] = useState('popular')
   const [isScrolled, setIsScrolled] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [showMobileFilters, setShowMobileFilters] = useState(false)
   const [checkoutForm, setCheckoutForm] = useState({
     name: '',
     phone: '',
     city: '',
     address: '',
-    paymentMethod: 'kaspi'
+    paymentMethod: 'freedom'
   })
+  
+  const itemsPerPage = 12
 
   useEffect(() => {
     const handleScroll = () => {
@@ -134,6 +139,15 @@ function Store() {
   } else if (sortBy === 'rating') {
     filtered = [...filtered].sort((a, b) => b.rating - a.rating)
   }
+
+  // Pagination
+  const totalPages = Math.ceil(filtered.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const paginatedProducts = filtered.slice(startIndex, startIndex + itemsPerPage)
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [activeCategory, priceRange, minRating, sortBy])
 
   return (
     <div className="store-page">
@@ -367,13 +381,23 @@ function Store() {
           {/* Products */}
           <div className="products-section">
             <div className="products-header">
-              <div className="products-sort">
-                <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-                  <option value="popular">Популярные</option>
-                  <option value="price-asc">Сначала дешевле</option>
-                  <option value="price-desc">Сначала дороже</option>
-                  <option value="rating">По рейтингу</option>
-                </select>
+              <div className="products-header-top">
+                <div className="products-sort">
+                  <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+                    <option value="popular">Популярные</option>
+                    <option value="price-asc">Сначала дешевле</option>
+                    <option value="price-desc">Сначала дороже</option>
+                    <option value="rating">По рейтингу</option>
+                  </select>
+                </div>
+                <button className="mobile-filters-btn" onClick={() => setShowMobileFilters(!showMobileFilters)}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <line x1="4" y1="6" x2="20" y2="6"/>
+                    <line x1="4" y1="12" x2="20" y2="12"/>
+                    <line x1="4" y1="18" x2="20" y2="18"/>
+                  </svg>
+                  Фильтры
+                </button>
               </div>
               <div className="products-tabs">
                 {categories.map(cat => (
@@ -388,8 +412,90 @@ function Store() {
               </div>
             </div>
 
+            {/* Mobile Filters */}
+            {showMobileFilters && (
+              <div className="mobile-filters">
+                <div className="mobile-filters-header">
+                  <h3>Фильтры</h3>
+                  <button onClick={() => setShowMobileFilters(false)}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <line x1="18" y1="6" x2="6" y2="18"/>
+                      <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                  </button>
+                </div>
+                <div className="mobile-filters-content">
+                  <div className="mobile-filter-group">
+                    <h4>Категория</h4>
+                    <ul className="mobile-category-list">
+                      {sideCategories.map((cat, i) => (
+                        <li key={i}>
+                          <label>
+                            <input type="radio" name="mobile-category" />
+                            <span>{cat.name}</span>
+                          </label>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="mobile-filter-group">
+                    <h4>Цена, ₸</h4>
+                    <div className="price-range">
+                      <input 
+                        type="number" 
+                        placeholder="от"
+                        value={priceRange[0] || ''}
+                        onChange={(e) => setPriceRange([Number(e.target.value) || 0, priceRange[1]])}
+                      />
+                      <span className="price-separator">—</span>
+                      <input 
+                        type="number" 
+                        placeholder="до"
+                        value={priceRange[1] || ''}
+                        onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value) || 500000])}
+                      />
+                    </div>
+                    <div className="price-slider-container">
+                      <input
+                        type="range"
+                        min="0"
+                        max="500000"
+                        step="1000"
+                        value={priceRange[1]}
+                        onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value)])}
+                        className="price-slider"
+                      />
+                    </div>
+                  </div>
+                  <div className="mobile-filter-group">
+                    <h4>Рейтинг</h4>
+                    <div className="rating-options">
+                      {[4.5, 4, 3.5, 3].map(rating => (
+                        <label key={rating} className="rating-option">
+                          <input 
+                            type="radio" 
+                            name="rating" 
+                            checked={minRating === rating}
+                            onChange={() => setMinRating(minRating === rating ? 0 : rating)}
+                          />
+                          <span className="radio-custom"></span>
+                          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                          от {rating}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <div className="mobile-filters-footer">
+                  <button className="apply-filters-btn" onClick={() => setShowMobileFilters(false)}>
+                    Применить
+                  </button>
+                </div>
+              </div>
+            )}
+
             <div className="products-grid">
-              {filtered.map((product) => (
+              {paginatedProducts.map((product) => (
                 <div key={product.id} className="product-card">
                   <button className="product-favorite">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -448,6 +554,65 @@ function Store() {
                 </div>
               ))}
             </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="pagination">
+                <button 
+                  className="pagination-btn"
+                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1}
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M15 18l-6-6 6-6"/>
+                  </svg>
+                </button>
+                
+                <div className="pagination-pages">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => {
+                    if (
+                      page === 1 ||
+                      page === totalPages ||
+                      (page >= currentPage - 1 && page <= currentPage + 1)
+                    ) {
+                      return (
+                        <button
+                          key={page}
+                          className={`pagination-page ${currentPage === page ? 'active' : ''}`}
+                          onClick={() => setCurrentPage(page)}
+                        >
+                          {page}
+                        </button>
+                      )
+                    } else if (page === currentPage - 2 || page === currentPage + 2) {
+                      return <span key={page} className="pagination-ellipsis">...</span>
+                    }
+                    return null
+                  })}
+                </div>
+
+                <button 
+                  className="pagination-btn"
+                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                  disabled={currentPage === totalPages}
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M9 18l6-6-6-6"/>
+                  </svg>
+                </button>
+              </div>
+            )}
+
+            {filtered.length === 0 && (
+              <div className="no-products">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <circle cx="11" cy="11" r="8"/>
+                  <path d="M21 21l-4.35-4.35"/>
+                </svg>
+                <p>Товары не найдены</p>
+                <span>Попробуйте изменить параметры фильтрации</span>
+              </div>
+            )}
           </div>
         </div>
       </main>
@@ -549,7 +714,7 @@ function Store() {
                   </div>
                   <button className="checkout-btn" onClick={() => setShowCheckout(true)}>Оформить заказ</button>
                   <div className="payment-info">
-                    Безопасная оплата через <span>Kaspi</span>
+                    Безопасная оплата через <span>Freedom</span>
                   </div>
                 </div>
               </>
@@ -627,19 +792,17 @@ function Store() {
                     <input
                       type="radio"
                       name="payment"
-                      value="kaspi"
-                      checked={checkoutForm.paymentMethod === 'kaspi'}
+                      value="freedom"
+                      checked={checkoutForm.paymentMethod === 'freedom'}
                       onChange={(e) => setCheckoutForm({...checkoutForm, paymentMethod: e.target.value})}
                     />
                     <div className="payment-option-content">
-                      <div className="payment-icon kaspi">
-                        <svg viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
-                        </svg>
+                      <div className="payment-icon freedom">
+                        <img src={FreedomIcon} alt="Freedom" />
                       </div>
                       <div>
-                        <div className="payment-name">Kaspi</div>
-                        <div className="payment-desc">Оплата через Kaspi.kz</div>
+                        <div className="payment-name">Freedom</div>
+                        <div className="payment-desc">Оплата через Freedom</div>
                       </div>
                     </div>
                   </label>
