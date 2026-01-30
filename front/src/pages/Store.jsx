@@ -6,12 +6,20 @@ function Store() {
   const navigate = useNavigate()
   const [cartItems, setCartItems] = useState([])
   const [showCart, setShowCart] = useState(false)
+  const [showCheckout, setShowCheckout] = useState(false)
   const [activeCategory, setActiveCategory] = useState('Все')
   const [searchQuery, setSearchQuery] = useState('')
   const [priceRange, setPriceRange] = useState([0, 500000])
   const [minRating, setMinRating] = useState(0)
   const [sortBy, setSortBy] = useState('popular')
   const [isScrolled, setIsScrolled] = useState(false)
+  const [checkoutForm, setCheckoutForm] = useState({
+    name: '',
+    phone: '',
+    city: '',
+    address: '',
+    paymentMethod: 'kaspi'
+  })
 
   useEffect(() => {
     const handleScroll = () => {
@@ -88,6 +96,8 @@ function Store() {
     } else {
       setCartItems([...cartItems, { ...product, qty: 1 }])
     }
+    // Открываем корзину после добавления товара
+    setShowCart(true)
   }
 
   const updateQty = (id, delta) => {
@@ -537,7 +547,7 @@ function Store() {
                     <span>Итого</span>
                     <strong>{formatPrice(cartTotal)} ₸</strong>
                   </div>
-                  <button className="checkout-btn">Оформить заказ</button>
+                  <button className="checkout-btn" onClick={() => setShowCheckout(true)}>Оформить заказ</button>
                   <div className="payment-info">
                     Безопасная оплата через <span>Kaspi</span>
                   </div>
@@ -545,6 +555,167 @@ function Store() {
               </>
             )}
           </aside>
+        </div>
+      )}
+
+      {/* Checkout Form */}
+      {showCheckout && (
+        <div className="checkout-overlay" onClick={() => setShowCheckout(false)}>
+          <div className="checkout-modal" onClick={e => e.stopPropagation()}>
+            <div className="checkout-header">
+              <h2>Оформление заказа</h2>
+              <button onClick={() => setShowCheckout(false)}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
+
+            <div className="checkout-content">
+              <div className="checkout-section">
+                <h3>Контактные данные</h3>
+                <div className="form-group">
+                  <label>Имя и фамилия</label>
+                  <input
+                    type="text"
+                    placeholder="Иван Иванов"
+                    value={checkoutForm.name}
+                    onChange={(e) => setCheckoutForm({...checkoutForm, name: e.target.value})}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Телефон</label>
+                  <input
+                    type="tel"
+                    placeholder="+7 (700) 123-45-67"
+                    value={checkoutForm.phone}
+                    onChange={(e) => setCheckoutForm({...checkoutForm, phone: e.target.value})}
+                  />
+                </div>
+              </div>
+
+              <div className="checkout-section">
+                <h3>Адрес доставки</h3>
+                <div className="form-group">
+                  <label>Город</label>
+                  <select
+                    value={checkoutForm.city}
+                    onChange={(e) => setCheckoutForm({...checkoutForm, city: e.target.value})}
+                  >
+                    <option value="">Выберите город</option>
+                    <option value="almaty">Алматы</option>
+                    <option value="astana">Астана</option>
+                    <option value="shymkent">Шымкент</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>Адрес</label>
+                  <input
+                    type="text"
+                    placeholder="Улица, дом, квартира"
+                    value={checkoutForm.address}
+                    onChange={(e) => setCheckoutForm({...checkoutForm, address: e.target.value})}
+                  />
+                </div>
+              </div>
+
+              <div className="checkout-section">
+                <h3>Способ оплаты</h3>
+                <div className="payment-methods">
+                  <label className="payment-option">
+                    <input
+                      type="radio"
+                      name="payment"
+                      value="kaspi"
+                      checked={checkoutForm.paymentMethod === 'kaspi'}
+                      onChange={(e) => setCheckoutForm({...checkoutForm, paymentMethod: e.target.value})}
+                    />
+                    <div className="payment-option-content">
+                      <div className="payment-icon kaspi">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
+                        </svg>
+                      </div>
+                      <div>
+                        <div className="payment-name">Kaspi</div>
+                        <div className="payment-desc">Оплата через Kaspi.kz</div>
+                      </div>
+                    </div>
+                  </label>
+                  <label className="payment-option">
+                    <input
+                      type="radio"
+                      name="payment"
+                      value="card"
+                      checked={checkoutForm.paymentMethod === 'card'}
+                      onChange={(e) => setCheckoutForm({...checkoutForm, paymentMethod: e.target.value})}
+                    />
+                    <div className="payment-option-content">
+                      <div className="payment-icon card">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+                          <line x1="1" y1="10" x2="23" y2="10"/>
+                        </svg>
+                      </div>
+                      <div>
+                        <div className="payment-name">Банковская карта</div>
+                        <div className="payment-desc">Visa, Mastercard, Мир</div>
+                      </div>
+                    </div>
+                  </label>
+                  <label className="payment-option">
+                    <input
+                      type="radio"
+                      name="payment"
+                      value="cash"
+                      checked={checkoutForm.paymentMethod === 'cash'}
+                      onChange={(e) => setCheckoutForm({...checkoutForm, paymentMethod: e.target.value})}
+                    />
+                    <div className="payment-option-content">
+                      <div className="payment-icon cash">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+                          <line x1="1" y1="10" x2="23" y2="10"/>
+                        </svg>
+                      </div>
+                      <div>
+                        <div className="payment-name">Наличными при получении</div>
+                        <div className="payment-desc">Оплата курьеру</div>
+                      </div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <div className="checkout-summary">
+                <div className="summary-row">
+                  <span>Товары ({cartCount})</span>
+                  <span>{formatPrice(cartTotal)} ₸</span>
+                </div>
+                <div className="summary-row">
+                  <span>Доставка</span>
+                  <span>Бесплатно</span>
+                </div>
+                <div className="summary-total">
+                  <span>К оплате</span>
+                  <strong>{formatPrice(cartTotal)} ₸</strong>
+                </div>
+              </div>
+
+              <button
+                className="pay-btn"
+                onClick={() => {
+                  alert('Заказ успешно оформлен!')
+                  setShowCheckout(false)
+                  setShowCart(false)
+                  setCartItems([])
+                }}
+              >
+                Оплатить {formatPrice(cartTotal)} ₸
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
