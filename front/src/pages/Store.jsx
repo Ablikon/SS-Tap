@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import FreedomIcon from '../assets/Freedom.png'
+import productsData from '../assets/products.json'
 import '../styles/Store.css'
 
 function Store() {
@@ -10,7 +11,6 @@ function Store() {
   const [showCheckout, setShowCheckout] = useState(false)
   const [activeCategory, setActiveCategory] = useState('Все')
   const [searchQuery, setSearchQuery] = useState('')
-  const [priceRange, setPriceRange] = useState([0, 500000])
   const [minRating, setMinRating] = useState(0)
   const [sortBy, setSortBy] = useState('popular')
   const [isScrolled, setIsScrolled] = useState(false)
@@ -34,63 +34,236 @@ function Store() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  const categories = [
-    { id: 'all', name: 'Все', icon: '⊞' },
-    { id: 'chairs', name: 'Стулья', icon: '🪑' },
-    { id: 'sofas', name: 'Диваны', icon: '🛋' },
-    { id: 'wardrobes', name: 'Шкафы', icon: '🚪' },
-    { id: 'beds', name: 'Кровати', icon: '🛏' },
-    { id: 'armchairs', name: 'Кресла', icon: '💺' },
-  ]
-
-  const categoryItems = [
-    { name: 'Стулья', image: '/chair.svg' },
-    { name: 'Диваны', image: '/sofa.svg' },
-    { name: 'Шкафы', image: '/wardrobe.svg' },
-    { name: 'Кровати', image: '/bed.svg' },
-    { name: 'Кресла', image: '/armchair.svg' },
-    { name: 'Столы', image: '/chair.svg' },
-  ]
-
-  const categoryTabs = [
-    'БЫТОВАЯ ТЕХНИКА',
-    'МЕБЕЛЬ',
-    'ДОМ И САД',
-    'ЭЛЕКТРОНИКА',
-    'ДЕТСКИЕ ТОВАРЫ',
-    'ЕЩЕ'
-  ]
-
-  const brands = [
-    { name: 'Mebel Style', logo: 'MS' },
-    { name: 'Grid Design', logo: 'GD' },
-    { name: 'Comfort XL', logo: 'CX' },
-    { name: 'Elite Comfort', logo: 'EC' },
-    { name: 'Modern Grey', logo: 'MG' },
-    { name: 'Lounge Premium', logo: 'LP' },
-  ]
-
-  const sideCategories = [
-    { name: 'Мебель для дома', count: 156 },
-    { name: 'Стулья и табуреты', count: 43 },
-    { name: 'Диваны и кресла', count: 67 },
-    { name: 'Шкафы и комоды', count: 28 },
-    { name: 'Кровати и матрасы', count: 35 },
-    { name: 'Столы', count: 24 },
-  ]
-
-  const products = [
-    { id: 1, name: 'Стул обеденный Mebel Style Rumba', category: 'Стулья', price: 14757, oldPrice: 18990, image: '/chair.svg', rating: 4.8, reviews: 156, badge: 'new', delivery: 'Завтра', credit: '2 458' },
-    { id: 2, name: 'Стул офисный Grid Design Pro', category: 'Стулья', price: 24759, image: '/chair.svg', rating: 4.9, reviews: 89, delivery: '2 февраля', credit: '4 127' },
-    { id: 3, name: 'Шкаф-купе Comfort XL белый', category: 'Шкафы', price: 64879, oldPrice: 74990, image: '/wardrobe.svg', rating: 4.7, reviews: 234, badge: 'sale', delivery: 'Завтра', credit: '10 813' },
-    { id: 4, name: 'Кровать двуспальная Elite Comfort', category: 'Кровати', price: 205795, image: '/bed.svg', rating: 4.9, reviews: 412, badge: 'hit', delivery: '3 февраля', credit: '34 299' },
-    { id: 5, name: 'Диван угловой Modern Grey', category: 'Диваны', price: 189990, oldPrice: 219990, image: '/sofa.svg', rating: 4.6, reviews: 178, delivery: 'Завтра', credit: '31 665' },
-    { id: 6, name: 'Кресло для отдыха Lounge Premium', category: 'Кресла', price: 156000, image: '/armchair.svg', rating: 4.8, reviews: 145, delivery: '4 февраля', credit: '26 000' },
-    { id: 7, name: 'Стул барный Industrial Loft', category: 'Стулья', price: 19990, image: '/chair.svg', rating: 4.5, reviews: 67, delivery: 'Завтра', credit: '3 332' },
-    { id: 8, name: 'Шкаф книжный Open Space', category: 'Шкафы', price: 45990, image: '/wardrobe.svg', rating: 4.4, reviews: 98, badge: 'new', delivery: '5 февраля', credit: '7 665' },
-  ]
-
+  // Функция форматирования цены
   const formatPrice = (price) => price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+
+  // Фильтруем активные товары
+  const activeProducts = useMemo(() => {
+    return productsData.filter(p => p.inStock && p.isActive && p.images && p.images.length > 0)
+  }, [])
+
+  // Преобразуем данные из JSON
+  const products = useMemo(() => {
+    const totalCount = activeProducts.length
+    return activeProducts.map((p, index) => {
+        const mainCategory = p.category_full_path ? p.category_full_path.split(' > ')[0] : 'Другое'
+        const hasDiscount = p.discount > 0 && p.originalPrice > p.price
+        
+        // Определяем badge (только для некоторых товаров)
+        let badge = null
+        // Новинка - только первые 5% товаров
+        if (index < totalCount * 0.05) badge = 'new'
+        // Скидка - если скидка >= 15%
+        else if (hasDiscount && p.discount >= 15) badge = 'sale'
+        // Хит продаж - высокий рейтинг и много отзывов
+        else if (p.rating >= 4.8 && p.reviewCount > 100) badge = 'hit'
+        
+        // Генерируем дату доставки
+        const deliveryDates = ['Завтра', '2 февраля', '3 февраля', '4 февраля', '5 февраля']
+        const delivery = deliveryDates[index % deliveryDates.length]
+        
+        // Рассчитываем кредит (цена / 6)
+        const credit = Math.round(p.price / 6)
+        
+        return {
+          id: p.id || p.productId || `product-${index}`,
+          name: p.title,
+          category: mainCategory,
+          price: p.price,
+          oldPrice: hasDiscount ? p.originalPrice : null,
+          image: p.images[0] || p.url_picture,
+          rating: p.rating || 4.5,
+          reviews: p.reviewCount || 0,
+          badge,
+          delivery,
+          credit: formatPrice(credit),
+          brand: p.brand || 'Без бренда'
+        }
+      })
+  }, [activeProducts])
+
+  // Извлекаем уникальные категории
+  const allCategories = useMemo(() => {
+    const categorySet = new Set()
+    productsData.forEach(p => {
+      if (p.category_full_path) {
+        const mainCategory = p.category_full_path.split(' > ')[0]
+        categorySet.add(mainCategory)
+      }
+    })
+    return Array.from(categorySet).slice(0, 10)
+  }, [])
+
+  // Извлекаем популярные бренды
+  const brands = useMemo(() => {
+    const brandCounts = {}
+    productsData.forEach(p => {
+      if (p.brand && p.brand !== 'Без бренда') {
+        brandCounts[p.brand] = (brandCounts[p.brand] || 0) + 1
+      }
+    })
+    
+    return Object.entries(brandCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 12)
+      .map(([name, count]) => {
+        // Генерируем инициалы для логотипа
+        const words = name.split(' ')
+        let logo = ''
+        if (words.length > 1) {
+          logo = (words[0][0] + words[1][0]).toUpperCase()
+        } else {
+          // Берем первые 2 символа, учитывая кириллицу
+          const firstTwo = name.substring(0, 2).toUpperCase()
+          logo = firstTwo.length === 2 ? firstTwo : firstTwo + ' '
+        }
+        
+        // Цвет для бренда (на основе имени)
+        const colors = ['#005BFF', '#00C853', '#FF5722', '#9C27B0', '#FF9800', '#2196F3', '#E91E63', '#4CAF50', '#FF6B9D', '#FFB800', '#9E9E9E', '#607D8B']
+        const colorIndex = name.charCodeAt(0) % colors.length
+        
+        return { name, logo, count, color: colors[colorIndex] }
+      })
+  }, [])
+
+  // Категории для сайдбара с подсчетом товаров
+  const sideCategories = useMemo(() => {
+    const categoryCounts = {}
+    productsData.forEach(p => {
+      if (p.category_full_path) {
+        const mainCategory = p.category_full_path.split(' > ')[0]
+        categoryCounts[mainCategory] = (categoryCounts[mainCategory] || 0) + 1
+      }
+    })
+    
+    return Object.entries(categoryCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 8)
+      .map(([name, count]) => ({ name, count }))
+  }, [])
+
+  // Категории для табов (из данных, первые 6)
+  const categoryTabs = useMemo(() => {
+    return allCategories.slice(0, 6).map(cat => cat.toUpperCase())
+  }, [allCategories])
+
+  // Категории для фильтров
+  const categories = useMemo(() => {
+    const cats = [{ id: 'all', name: 'Все', icon: '⊞' }]
+    allCategories.slice(0, 6).forEach((cat, index) => {
+      const icons = ['🪑', '🛋', '🚪', '🛏', '💺', '📦']
+      cats.push({ id: cat.toLowerCase().replace(/\s+/g, '-'), name: cat, icon: icons[index] || '📦' })
+    })
+    return cats
+  }, [allCategories])
+
+  // Функция для получения SVG иконки категории (упрощенные)
+  const getCategoryIcon = (categoryName) => {
+    const iconMap = {
+      'Товары для дома и дачи': (
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="12" y="18" width="40" height="32" rx="6" fill="#005BFF"/>
+          <rect x="18" y="24" width="28" height="3" rx="1.5" fill="white"/>
+          <rect x="18" y="32" width="20" height="3" rx="1.5" fill="white"/>
+          <circle cx="50" cy="28" r="3" fill="white"/>
+        </svg>
+      ),
+      'Детские товары': (
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="32" cy="28" r="14" fill="#FF6B9D"/>
+          <circle cx="28" cy="26" r="2.5" fill="white"/>
+          <circle cx="36" cy="26" r="2.5" fill="white"/>
+          <path d="M24 36c0 4 4 8 8 8s8-4 8-8" stroke="white" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
+        </svg>
+      ),
+      'Товары для животных': (
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="32" cy="32" r="16" fill="#FFB800"/>
+          <circle cx="26" cy="28" r="3" fill="white"/>
+          <circle cx="38" cy="28" r="3" fill="white"/>
+          <path d="M24 38c2 3 6 4 8 4s6-1 8-4" stroke="white" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
+        </svg>
+      ),
+      'Подарки, товары для праздников': (
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="18" y="20" width="28" height="28" rx="5" fill="#E91E63"/>
+          <path d="M32 20v28M18 34h28" stroke="white" strokeWidth="3"/>
+          <circle cx="26" cy="30" r="2" fill="white"/>
+          <circle cx="38" cy="30" r="2" fill="white"/>
+        </svg>
+      ),
+      'Спорт, туризм': (
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="32" cy="32" r="16" fill="#00C853"/>
+          <path d="M24 24l16 16M40 24l-16 16" stroke="white" strokeWidth="4" strokeLinecap="round"/>
+        </svg>
+      ),
+      'Красота и здоровье': (
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="32" cy="32" r="16" fill="#9C27B0"/>
+          <circle cx="32" cy="32" r="10" fill="white" opacity="0.3"/>
+          <path d="M32 22v20M22 32h20" stroke="white" strokeWidth="3" strokeLinecap="round"/>
+        </svg>
+      ),
+      'Электроника': (
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="14" y="18" width="36" height="28" rx="4" fill="#2196F3"/>
+          <rect x="18" y="22" width="28" height="2" rx="1" fill="white"/>
+          <rect x="18" y="28" width="20" height="2" rx="1" fill="white"/>
+          <circle cx="48" cy="30" r="2.5" fill="white"/>
+        </svg>
+      ),
+      'Бытовая техника': (
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="16" y="20" width="32" height="28" rx="4" fill="#FF5722"/>
+          <circle cx="32" cy="34" r="6" fill="white" opacity="0.4"/>
+          <rect x="20" y="42" width="24" height="2" rx="1" fill="white"/>
+        </svg>
+      ),
+      'Одежда': (
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M24 18h16l-2 18H26l-2-18z" fill="#FF9800"/>
+          <path d="M28 24h8M28 28h8" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+        </svg>
+      ),
+      'Продукты питания': (
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="32" cy="32" r="16" fill="#4CAF50"/>
+          <path d="M24 28l8 8 12-12" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      ),
+    }
+    
+    return iconMap[categoryName] || (
+      <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="18" y="20" width="28" height="28" rx="5" fill="#666"/>
+        <path d="M28 32h8M32 28v8" stroke="white" strokeWidth="3" strokeLinecap="round"/>
+      </svg>
+    )
+  }
+
+  // Категории для карточек (с иконками)
+  const categoryItems = useMemo(() => {
+    return allCategories.slice(0, 6).map(cat => ({
+      name: cat,
+      icon: getCategoryIcon(cat)
+    }))
+  }, [allCategories])
+
+  // Вычисляем максимальную цену из продуктов
+  const maxPrice = useMemo(() => {
+    if (products.length === 0) return 500000
+    return Math.max(...products.map(p => p.price))
+  }, [products])
+  
+  const [priceRange, setPriceRange] = useState([0, 500000])
+  
+  // Обновляем priceRange когда maxPrice изменится
+  useEffect(() => {
+    if (maxPrice > 0) {
+      setPriceRange([0, Math.min(maxPrice, 500000)])
+    }
+  }, [maxPrice])
 
   const addToCart = (product) => {
     const existing = cartItems.find(item => item.id === product.id)
@@ -116,18 +289,14 @@ function Store() {
   const cartTotal = cartItems.reduce((sum, item) => sum + item.price * item.qty, 0)
   const cartCount = cartItems.reduce((sum, item) => sum + item.qty, 0)
 
-  const categoryMap = {
-    'Все': 'all',
-    'Стулья': 'chairs',
-    'Диваны': 'sofas',
-    'Шкафы': 'wardrobes',
-    'Кровати': 'beds',
-    'Кресла': 'armchairs'
-  }
-
+  // Фильтрация продуктов
   let filtered = activeCategory === 'Все' 
     ? products.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
-    : products.filter(p => p.category === activeCategory && p.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    : products.filter(p => {
+        const selectedCategory = categories.find(c => c.name === activeCategory)
+        if (!selectedCategory || selectedCategory.id === 'all') return true
+        return p.category === activeCategory
+      }).filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
   
   filtered = filtered.filter(p => p.price >= priceRange[0] && p.price <= priceRange[1])
   filtered = filtered.filter(p => p.rating >= minRating)
@@ -233,11 +402,19 @@ function Store() {
                 <div className="categories-links">
                   <a href="#">Рассрочка 0-0-12</a>
                   <a href="#">Казахстанские продавцы</a>
-                  <a href="#">Мебель</a>
-                  <a href="#">Дом и сад</a>
-                  <a href="#">Электроника</a>
-                  <a href="#">Детские товары</a>
-                  <a href="#">Бытовая техника</a>
+                  {allCategories.slice(0, 5).map((cat, index) => (
+                    <a 
+                      key={index} 
+                      href="#" 
+                      onClick={(e) => {
+                        e.preventDefault()
+                        setActiveCategory(cat)
+                        window.scrollTo({ top: 0, behavior: 'smooth' })
+                      }}
+                    >
+                      {cat}
+                    </a>
+                  ))}
                 </div>
               </div>
               <div className="header-bottom-right">
@@ -255,22 +432,45 @@ function Store() {
       {/* Category Section */}
       <section className="category-section">
         <div className="category-header-wrapper">
-          <h2 className="category-title">Мебель</h2>
+          <h2 className="category-title">{activeCategory === 'Все' ? (allCategories[0] || 'Категории') : activeCategory}</h2>
           <div className="category-tabs">
-            {categoryTabs.map((tab, index) => (
-              <button key={index} className={`category-tab ${index === 1 ? 'active' : ''}`}>
-                {tab}
-              </button>
-            ))}
+            {categoryTabs.map((tab, index) => {
+              const categoryName = allCategories[index] || ''
+              const isActive = activeCategory === categoryName || (index === 0 && activeCategory === 'Все')
+              return (
+                <button 
+                  key={index} 
+                  className={`category-tab ${isActive ? 'active' : ''}`}
+                  onClick={() => {
+                    if (index === 0) {
+                      setActiveCategory('Все')
+                    } else {
+                      setActiveCategory(categoryName)
+                    }
+                    window.scrollTo({ top: 0, behavior: 'smooth' })
+                  }}
+                >
+                  {tab}
+                </button>
+              )
+            })}
           </div>
         </div>
         
         <div className="category-grid-block">
           <div className="category-grid">
             {categoryItems.map((item, index) => (
-              <div key={index} className="category-card">
+              <div 
+                key={index} 
+                className="category-card"
+                onClick={() => {
+                  setActiveCategory(item.name)
+                  window.scrollTo({ top: 0, behavior: 'smooth' })
+                }}
+                style={{ cursor: 'pointer' }}
+              >
                 <div className="category-image">
-                  <img src={item.image} alt={item.name} />
+                  {item.icon}
                 </div>
                 <span className="category-name">{item.name}</span>
               </div>
@@ -286,7 +486,9 @@ function Store() {
           <div className="brands-grid">
             {brands.map((brand, index) => (
               <div key={index} className="brand-item">
-                <div className="brand-logo">{brand.logo}</div>
+                <div className="brand-logo" style={{ background: brand.color }}>
+                  {brand.logo}
+                </div>
                 <span className="brand-name">{brand.name}</span>
               </div>
             ))}
@@ -303,12 +505,34 @@ function Store() {
               <h3 className="sidebar-title">Категория</h3>
               <ul className="category-list">
                 {sideCategories.map((cat, i) => (
-                  <li key={i} className={i === 0 ? 'active' : ''}>
-                    <a href="#">{cat.name}</a>
+                  <li 
+                    key={i} 
+                    className={activeCategory === cat.name ? 'active' : ''}
+                  >
+                    <a 
+                      href="#" 
+                      onClick={(e) => {
+                        e.preventDefault()
+                        setActiveCategory(cat.name)
+                        window.scrollTo({ top: 0, behavior: 'smooth' })
+                      }}
+                    >
+                      {cat.name}
+                    </a>
+                    <span className="category-count">({cat.count})</span>
                   </li>
                 ))}
                 <li className="show-all">
-                  <a href="#">Посмотреть все</a>
+                  <a 
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      setActiveCategory('Все')
+                      window.scrollTo({ top: 0, behavior: 'smooth' })
+                    }}
+                  >
+                    Посмотреть все
+                  </a>
                 </li>
               </ul>
 
@@ -325,14 +549,14 @@ function Store() {
                   type="number" 
                   placeholder="до"
                   value={priceRange[1] || ''}
-                  onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value) || 500000])}
+                  onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value) || maxPrice])}
                 />
               </div>
               <div className="price-slider-container">
                 <input
                   type="range"
                   min="0"
-                  max="500000"
+                  max={maxPrice}
                   step="1000"
                   value={priceRange[1]}
                   onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value)])}
@@ -452,14 +676,14 @@ function Store() {
                         type="number" 
                         placeholder="до"
                         value={priceRange[1] || ''}
-                        onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value) || 500000])}
+                        onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value) || maxPrice])}
                       />
                     </div>
                     <div className="price-slider-container">
                       <input
                         type="range"
                         min="0"
-                        max="500000"
+                        max={maxPrice}
                         step="1000"
                         value={priceRange[1]}
                         onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value)])}
