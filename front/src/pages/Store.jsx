@@ -344,7 +344,7 @@ function Store() {
               </button>
               <input 
                 type="text" 
-                placeholder="Искать на SS Tap"
+                placeholder="Искать на Elmart"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -860,7 +860,7 @@ function Store() {
       {/* Footer */}
       <footer className="store-footer">
         <div className="footer-container">
-          <span>Работает на <strong>SS Tap</strong></span>
+          <span>Работает на <strong>Elmart</strong></span>
           <div className="footer-links">
             <a href="#">Доставка</a>
             <a href="#">Оплата</a>
