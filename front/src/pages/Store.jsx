@@ -326,7 +326,7 @@ function Store() {
           <div className="header-top">
             <div className="header-left">
               <div className="store-logo">
-                <div className="logo-icon">A</div>
+                <div className="logo-icon">E</div>
                 <div className="logo-info">
                   <span className="logo-name">Elmart</span>
                   {/* <div className="logo-rating">
