@@ -150,7 +150,7 @@ function Landing() {
                     <div className="shop-header">
                       <div className="shop-logo">
                         <div className="shop-logo-icon">K</div>
-                        <span>ТОО "Autodata"</span>
+                        <span>Elmart</span>
                       </div>
                       <button className="shop-cart-btn">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

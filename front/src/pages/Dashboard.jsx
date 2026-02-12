@@ -121,7 +121,7 @@ function Dashboard() {
             <div className="store-details">
               <div className="store-name">ТОО "Autodata"</div>
               <div className="store-link">
-                autodata.sstap.kz
+                Elmart.kz
                 <span className="link-icon"><Icon name="link" /></span>
               </div>
             </div>
